@@ -1,0 +1,24 @@
+This program's depends on the POSIX specification and, optionally, OpenCL. 
+
+To compile with OpenCL support, type: 
+
+make opencl
+
+To compile without OpenCL support, type:
+
+make nocl
+
+To compile both (with test cases) type:
+
+make
+
+To invoke the program, execute either
+
+./des 
+
+or 
+
+./des_cl
+
+Arguments are optional, first argument is the number of keys and the second (nocl only) is for the number of threads to instantiate.
+
