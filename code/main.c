@@ -21,14 +21,14 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #define TEST_SIZE 102400000
-#define THREADS 8
 int main(int argc, char** argv) {
-    int num_threads = THREADS;
+    int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
     int test_size = TEST_SIZE;
-    if (argc > 1) 
-       test_size = atoi(argv[1]); 
+    if (argc > 1)
+       test_size = atoi(argv[1]);
     if (argc > 2)
        num_threads = atoi(argv[2]);
     #ifdef UNIT_TESTS
