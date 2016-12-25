@@ -1,7 +1,7 @@
 /****************************************************************************
    (C) 2012 Doug Johnson
 
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -48,49 +48,49 @@
 //#define DEBUG_MANGLER
 //#define DEBUG_SBOX
 
-static uint32_t sbox[8][4][16] = {                      
+static uint32_t sbox[8][4][16] = {
 //S1  0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
     {{0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7},
      {0x0, 0xf, 0x7, 0x4, 0xe, 0x2, 0xd, 0x1, 0xa, 0x6, 0xc, 0xb, 0x9, 0x5, 0x3, 0x8},
      {0x4, 0x1, 0xe, 0x8, 0xd, 0x6, 0x2, 0xb, 0xf, 0xc, 0x9, 0x7, 0x3, 0xa, 0x5, 0x0},
      {0xf, 0xc, 0x8, 0x2, 0x4, 0x9, 0x1, 0x7, 0x5, 0xb, 0x3, 0xe, 0xa, 0x0, 0x6, 0xd}},
-                           
+
 //S2 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
     {{0xf, 0x1, 0x8, 0xe, 0x6, 0xb, 0x3, 0x4, 0x9, 0x7, 0x2, 0xd, 0xc, 0x0, 0x5, 0xa},
      {0x3, 0xd, 0x4, 0x7, 0xf, 0x2, 0x8, 0xe, 0xc, 0x0, 0x1, 0xa, 0x6, 0x9, 0xb, 0x5},
      {0x0, 0xe, 0x7, 0xb, 0xa, 0x4, 0xd, 0x1, 0x5, 0x8, 0xc, 0x6, 0x9, 0x3, 0x2, 0xf},
      {0xd, 0x8, 0xa, 0x1, 0x3, 0xf, 0x4, 0x2, 0xb, 0x6, 0x7, 0xc, 0x0, 0x5, 0xe, 0x9}},
-                           
+
 //S3 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
    {{0xa, 0x0, 0x9, 0xe, 0x6, 0x3, 0xf, 0x5, 0x1, 0xd, 0xc, 0x7, 0xb, 0x4, 0x2, 0x8},
     {0xd, 0x7, 0x0, 0x9, 0x3, 0x4, 0x6, 0xa, 0x2, 0x8, 0x5, 0xe, 0xc, 0xb, 0xf, 0x1},
     {0xd, 0x6, 0x4, 0x9, 0x8, 0xf, 0x3, 0x0, 0xb, 0x1, 0x2, 0xc, 0x5, 0xa, 0xe, 0x7},
     {0x1, 0xa, 0xd, 0x0, 0x6, 0x9, 0x8, 0x7, 0x4, 0xf, 0xe, 0x3, 0xb, 0x5, 0x2, 0xc}},
-                           
+
 //S4 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
    {{0x7, 0xd, 0xe, 0x3, 0x0, 0x6, 0x9, 0xa, 0x1, 0x2, 0x8, 0x5, 0xb, 0xc, 0x4, 0xf},
     {0xd, 0x8, 0xb, 0x5, 0x6, 0xf, 0x0, 0x3, 0x4, 0x7, 0x2, 0xc, 0x1, 0xa, 0xe, 0x9},
     {0xa, 0x6, 0x9, 0x0, 0xc, 0xb, 0x7, 0xd, 0xf, 0x1, 0x3, 0xe, 0x5, 0x2, 0x8, 0x4},
     {0x3, 0xf, 0x0, 0x6, 0xa, 0x1, 0xd, 0x8, 0x9, 0x4, 0x5, 0xb, 0xc, 0x7, 0x2, 0xe}},
-                           
+
 //S5 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
    {{0x2, 0xc, 0x4, 0x1, 0x7, 0xa, 0xb, 0x6, 0x8, 0x5, 0x3, 0xf, 0xd, 0x0, 0xe, 0x9},
     {0xe, 0xb, 0x2, 0xc, 0x4, 0x7, 0xd, 0x1, 0x5, 0x0, 0xf, 0xa, 0x3, 0x9, 0x8, 0x6},
     {0x4, 0x2, 0x1, 0xb, 0xa, 0xd, 0x7, 0x8, 0xf, 0x9, 0xc, 0x5, 0x6, 0x3, 0x0, 0xe},
     {0xb, 0x8, 0xc, 0x7, 0x1, 0xe, 0x2, 0xd, 0x6, 0xf, 0x0, 0x9, 0xa, 0x4, 0x5, 0x3}},
-                           
+
 //S6 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
    {{0xc, 0x1, 0xa, 0xf, 0x9, 0x2, 0x6, 0x8, 0x0, 0xd, 0x3, 0x4, 0xe, 0x7, 0x5, 0xb},
     {0xa, 0xf, 0x4, 0x2, 0x7, 0xc, 0x9, 0x5, 0x6, 0x1, 0xd, 0xe, 0x0, 0xb, 0x3, 0x8},
     {0x9, 0xe, 0xf, 0x5, 0x2, 0x8, 0xc, 0x3, 0x7, 0x0, 0x4, 0xa, 0x1, 0xd, 0xb, 0x6},
     {0x4, 0x3, 0x2, 0xc, 0x9, 0x5, 0xf, 0xa, 0xb, 0xe, 0x1, 0x7, 0x6, 0x0, 0x8, 0xd}},
-                           
+
 //S7 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
    {{0x4, 0xb, 0x2, 0xe, 0xf, 0x0, 0x8, 0xd, 0x3, 0xc, 0x9, 0x7, 0x5, 0xa, 0x6, 0x1},
     {0xd, 0x0, 0xb, 0x7, 0x4, 0x9, 0x1, 0xa, 0xe, 0x3, 0x5, 0xc, 0x2, 0xf, 0x8, 0x6},
     {0x1, 0x4, 0xb, 0xd, 0xc, 0x3, 0x7, 0xe, 0xa, 0xf, 0x6, 0x8, 0x0, 0x5, 0x9, 0x2},
     {0x6, 0xb, 0xd, 0x8, 0x1, 0x4, 0xa, 0x7, 0x9, 0x5, 0x0, 0xf, 0xe, 0x2, 0x3, 0xc}},
-                           
+
 //S8 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf,
    {{0xd, 0x2, 0x8, 0x4, 0x6, 0xf, 0xb, 0x1, 0xa, 0x9, 0x3, 0xe, 0x5, 0x0, 0xc, 0x7},
     {0x1, 0xf, 0xd, 0x8, 0xa, 0x3, 0x7, 0x4, 0xc, 0x5, 0x6, 0xb, 0x0, 0xe, 0x9, 0x2},
@@ -103,14 +103,14 @@ static uint32_t sbox[8][4][16] = {
 //Initial permutation
 static uint32_t ip_i = 64;
 static uint32_t ip_o = 64;
-static uint32_t ip[] = {    
-    58, 50, 42, 34, 26, 18, 10, 2, 
-    60, 52, 44, 36, 28, 20, 12, 4, 
-    62, 54, 46, 38, 30, 22, 14, 6, 
-    64, 56, 48, 40, 32, 24, 16, 8, 
-    57, 49, 41, 33, 25, 17, 9, 1, 
-    59, 51, 43, 35, 27, 19, 11, 3, 
-    61, 53, 45, 37, 29, 21, 13, 5, 
+static uint32_t ip[] = {
+    58, 50, 42, 34, 26, 18, 10, 2,
+    60, 52, 44, 36, 28, 20, 12, 4,
+    62, 54, 46, 38, 30, 22, 14, 6,
+    64, 56, 48, 40, 32, 24, 16, 8,
+    57, 49, 41, 33, 25, 17, 9, 1,
+    59, 51, 43, 35, 27, 19, 11, 3,
+    61, 53, 45, 37, 29, 21, 13, 5,
     63, 55, 47, 39, 31, 23, 15, 7  };
 
 //Initial key permutation
@@ -132,21 +132,21 @@ static uint32_t rkp[] = {
 //Round block permutation
 static uint32_t rp_i = 32;
 static uint32_t rp_o = 32;
-static uint32_t rp[] = {16, 7, 20, 21, 29, 12, 28, 17, 
-        1, 15, 23, 26, 5, 18, 31, 10, 
-        2, 8, 24, 14, 32, 27, 3, 9, 
+static uint32_t rp[] = {16, 7, 20, 21, 29, 12, 28, 17,
+        1, 15, 23, 26, 5, 18, 31, 10,
+        2, 8, 24, 14, 32, 27, 3, 9,
         19, 13, 30, 6, 22, 11, 4, 25};
 static inline uint64_t extractBit(uint64_t input, int src, int dst, int s_size, int d_size) {
     dst = (d_size - dst);
     src = (s_size - src);
     uint64_t bit = (uint64_t)0x1 << (src);
     uint64_t output;
-    if (src >= dst) 
+    if (src >= dst)
         output =  (input & bit) >> (src - dst);
     else
         output = (input & bit) << (dst - src);
     #ifdef DEBUG_EXTRACTOR
-        printf("extractBit:\tsrc:%u\tdst:%u\t\tI:%16llX\tO:%16llX\n", src, dst, input, output); 
+        printf("extractBit:\tsrc:%u\tdst:%u\t\tI:%16llX\tO:%16llX\n", src, dst, input, output);
     #endif
     return output;
 }
@@ -165,7 +165,7 @@ static uint64_t doInversePermute(uint64_t input, uint32_t* mapping, uint32_t s_s
         output |= extractBit(input, i, mapping[i - 1], s_size, d_size);
     }
     return output;
-} 
+}
 
 static uint32_t doSBoxSub(int s_selector, uint32_t input) {
     uint32_t left = (input & 0x20)>>4; //Grab the outer bits
@@ -208,7 +208,7 @@ static uint64_t generatePerRoundKey(uint64_t CD) {
 
 static uint64_t rotateCD(int round_num, uint64_t CD) {
    int rotation = 2;
-    if (round_num == 0 || round_num == 1 || round_num == 8 || round_num == 15) 
+    if (round_num == 0 || round_num == 1 || round_num == 8 || round_num == 15)
        rotation = 1;
     uint32_t C = 0;
     uint32_t D = 0;
@@ -236,12 +236,12 @@ static uint32_t manglerFunction(uint64_t key, uint32_t R) {
         uint64_t EKS = 0;
     #endif
     for (int i = 0; i < 8; i++ ) {
-        if (i == 0) { 
+        if (i == 0) {
             block_r = ((R & 0x1F) << 1);
         }
         else {
             block_r = (R & (mask << ((i * 4) - 1))) >> ((i * 4) - 1);
-            
+
         }
         if (i == 0) {
             block_r = block_r | ((R & 0x80000000)>>31);
@@ -254,12 +254,12 @@ static uint32_t manglerFunction(uint64_t key, uint32_t R) {
         #ifdef DEBUG_MANGLER
             E |= ((uint64_t)block_r << (i * 6));
             EKS |= ((uint64_t)block << (i * 6));
-  
+
         #endif
-        output |= ((doSBoxSub(7 - i, block)) << (i*4)); 
+        output |= ((doSBoxSub(7 - i, block)) << (i*4));
     }
     uint32_t perm = doPermute(output, rp, rp_i, rp_o);
-    #ifdef DEBUG_MANGLER 
+    #ifdef DEBUG_MANGLER
         printf("MANGLER: E: %14llx KS: %14llx E^KS: %14llx SBox: %8llx Perm: %8llx\n",E, key, EKS, output, perm);
     #endif
     return perm;
@@ -300,7 +300,7 @@ static uint64_t computeDecryptionRound(int round_num, uint64_t input, uint64_t k
     uint32_t L = (uint64_t)(input >> 32);
     uint64_t output = L;
     output = output | ((uint64_t)(manglerFunction(key, L)^R)<<32);
-    return output;       
+    return output;
 }
 
 uint64_t DESEncrypt(uint64_t input, uint64_t key) {
@@ -317,7 +317,7 @@ uint64_t DESEncrypt(uint64_t input, uint64_t key) {
         CD = rotateCD(i, CD);
         keys[i] = generatePerRoundKey(CD);
         #ifdef DEBUG_KEYGEN
-        printf("K%u:\t%16llx\tCD:%16llx\n", i, keys[i], CD); 
+        printf("K%u:\t%16llx\tCD:%16llx\n", i, keys[i], CD);
         #endif
     }
     for (int round_num = 0; round_num < 16; round_num++) {
@@ -326,10 +326,10 @@ uint64_t DESEncrypt(uint64_t input, uint64_t key) {
     //Endianess issues require 32-bit block swap
     input = (input >> 32) | (input  << 32);
     uint64_t output = finalPermutation(input);
-    #ifdef DEBUG_ROUNDS                                                          
-        printf("F: %16llx FP: %16llx\n", input, output);   
+    #ifdef DEBUG_ROUNDS
+        printf("F: %16llx FP: %16llx\n", input, output);
     #endif
-    return output; 
+    return output;
 }
 
 uint64_t DESDecrypt(uint64_t input, uint64_t key) {
@@ -347,7 +347,7 @@ uint64_t DESDecrypt(uint64_t input, uint64_t key) {
         CD = rotateCD(i, CD);
         keys[i] = generatePerRoundKey(CD);
         #ifdef DEBUG_KEYGEN
-        printf("K%u:\t%16llx\tCD:%16llx\n", i, keys[i], CD); 
+        printf("K%u:\t%16llx\tCD:%16llx\n", i, keys[i], CD);
         #endif
     }
     for (int round_num = 15; round_num >= 0; round_num--) {
@@ -376,7 +376,7 @@ static void* startBruteForceEncryptThread(void* arg) {
         bf_data->array[i] = DESEncrypt(bf_data->data, key);
         *(bf_data->num_checked)+=1;
     }
-    return NULL; 
+    return NULL;
 }
 
 static void* startBruteForceDecryptThread(void* arg) {
@@ -389,7 +389,7 @@ static void* startBruteForceDecryptThread(void* arg) {
         bf_data->array[i] = DESDecrypt(bf_data->data, key);
         *(bf_data->num_checked)+=1;
     }
-    return NULL; 
+    return NULL;
 }
 
 typedef struct {
@@ -438,9 +438,9 @@ void* printStatistics(void* arg) {
         total = getTotal(stats);
         printf("%llu = keys checked at ~ %f keys/s. t = %f s\n", total,(total)/((c_time - start_time)), c_time - start_time );
     }
-} 
+}
 
-static int startBruteForce(void* (thread_ptr)(void*), 
+static int startBruteForce(void* (thread_ptr)(void*),
                             uint64_t* output,
                             uint32_t size,
                             uint64_t key_start,
@@ -448,6 +448,8 @@ static int startBruteForce(void* (thread_ptr)(void*),
                             uint32_t num_threads) {
     pthread_t threads[num_threads];
     uint64_t num_checked[num_threads];
+    for (int i = 0; i < num_threads; i++)
+        num_checked[i] = 0;
     BruteForceData bf_data[num_threads];
     int err;
     uint32_t division = size / num_threads;
@@ -455,20 +457,20 @@ static int startBruteForce(void* (thread_ptr)(void*),
     StatsStruct stats;
     stats.num_checked = num_checked;
     stats.num_threads = num_threads;
-    pthread_create(&stats_thread, NULL, printStatistics, (void*) &stats); 
+    pthread_create(&stats_thread, NULL, printStatistics, (void*) &stats);
     for (int i = 0; i < num_threads; i++) {
         bf_data[i].thread_id = i;
         bf_data[i].data = data;
         bf_data[i].size = division;
         bf_data[i].array = output + (division * i);
         bf_data[i].key_start = key_start + (division * i);
-        bf_data[i].num_checked = &num_checked[i]; 
+        bf_data[i].num_checked = &num_checked[i];
         err = pthread_create(&threads[i], NULL, thread_ptr, (void*) &bf_data[i]);
         if (err != 0) {
             //TODO error code handling
             fprintf(stderr, "Unable to create worker threads.\n");
             return 0;
-        } 
+        }
     }
     for (int i = 0; i < num_threads;i++) {
         pthread_join(threads[i], NULL);
@@ -477,18 +479,18 @@ static int startBruteForce(void* (thread_ptr)(void*),
     pthread_cancel(stats_thread);
     return 1;
 }
-                            
 
-int DESBruteForceEncrypt(uint64_t* output,                                      
-                          uint32_t size,                                         
+
+int DESBruteForceEncrypt(uint64_t* output,
+                          uint32_t size,
                           uint64_t key_start,
-                          uint64_t data,                                     
+                          uint64_t data,
                           uint32_t num_threads) {
     return startBruteForce(startBruteForceEncryptThread, output, size, key_start, data, num_threads);
-}                            
-                                                                                 
-int DESBruteForceDecrypt(uint64_t* output,                                      
-                          uint32_t size,                                         
+}
+
+int DESBruteForceDecrypt(uint64_t* output,
+                          uint32_t size,
                           uint64_t key_start,
                           uint64_t data,
                           uint32_t num_threads) {
@@ -500,13 +502,13 @@ int DESBruteForceDecrypt(uint64_t* output,
 #define BLOCK_SIZE 1048576 
 
 typedef struct {
-    cl_platform_id platform;                                                     
-    cl_context context;                                                          
-    cl_command_queue queue;                                                      
-    cl_device_id device;                                                         
-    cl_program program;                                                          
-    cl_kernel krn_enc;  
-    cl_kernel krn_dec;  
+    cl_platform_id platform;
+    cl_context context;
+    cl_command_queue queue;
+    cl_device_id device;
+    cl_program program;
+    cl_kernel krn_enc;
+    cl_kernel krn_dec;
     cl_mem output;
 } OpenCLData;
 
@@ -514,7 +516,7 @@ typedef struct {
 void checkCLError(int error, const char* position) {
     if (error != CL_SUCCESS) {
         fprintf(stderr, "OpenCL Error Thrown at %s. %i\n", position, error);
-        exit(1);   
+        exit(1);
     }
 }
 
@@ -525,7 +527,7 @@ int initOpenCL(OpenCLData* data, int cl_size) {
     error = clGetPlatformIDs(1, &(data->platform), NULL);
     checkCLError(error, "clGetPlatformIDs");
     // Device
-    error = clGetDeviceIDs(data->platform, CL_DEVICE_TYPE_GPU, 1, 
+    error = clGetDeviceIDs(data->platform, CL_DEVICE_TYPE_GPU, 1,
                            &(data->device), NULL);
     checkCLError(error, "clGetDeviceIDs");
     // Context
@@ -537,52 +539,52 @@ int initOpenCL(OpenCLData* data, int cl_size) {
 
 
 
-                                                                               
+
     const char* FILE_NAME = "des.cl";
-    FILE *fp;                                                                    
-    fp = fopen(FILE_NAME, "r");                                                  
-    if (!fp) {                                                                   
-        fprintf(stderr, "Failed to load the kernel.\n");                         
-        exit(1);                                                                 
-    }                                                                            
-    fseek(fp, 0, SEEK_END);                                                      
-    int sz = ftell(fp);                                                          
-    fseek(fp, 0, SEEK_SET);                                                      
+    FILE *fp;
+    fp = fopen(FILE_NAME, "r");
+    if (!fp) {
+        fprintf(stderr, "Failed to load the kernel.\n");
+        exit(1);
+    }
+    fseek(fp, 0, SEEK_END);
+    int sz = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
     char* buf = malloc((sz + 1) * sizeof(char));
 	if (buf == NULL) {
 		fprintf(stderr, "Out of memory.\n");
 		exit(1);
-	} 
-    buf[sz] = '\0';                                                              
-    fread(buf, sizeof(char), sz, fp);                                            
-    fclose(fp);                                                                  
-                                                                                 
+	}
+    buf[sz] = '\0';
+    fread(buf, sizeof(char), sz, fp);
+    fclose(fp);
+
     data->program = clCreateProgramWithSource(data->context, 1
-                                              , (const char **)&buf, 
+                                              , (const char **)&buf,
                                              NULL, &error);
-    checkCLError(error, "clCreateProgramWithSource");                                                 
-    error = clBuildProgram(data->program, 0, NULL, NULL, NULL, NULL); 
-    if (error != CL_SUCCESS) { 
-        char log[10000];                                                          
-        error = clGetProgramBuildInfo(data->program, data->device, 
-                                      CL_PROGRAM_BUILD_LOG, sizeof(char[10000]), 
+    checkCLError(error, "clCreateProgramWithSource");
+    error = clBuildProgram(data->program, 0, NULL, NULL, NULL, NULL);
+    if (error != CL_SUCCESS) {
+        char log[10000];
+        error = clGetProgramBuildInfo(data->program, data->device,
+                                      CL_PROGRAM_BUILD_LOG, sizeof(char[10000]),
                                       &log , NULL);
-        printf("Log %i:\n%s\n",error, log);                                       
-    }                                                                            
-    checkCLError(error, "clGetProgramBuildInfo");                                                 
-                                                                                 
-    data->krn_enc = clCreateKernel(data->program, "des_encrypt_kern", &error);                       
-    data->krn_dec = clCreateKernel(data->program, "des_decrypt_kern", &error); 
-    checkCLError(error, "");                                                 
-    free(buf);  
+        printf("Log %i:\n%s\n",error, log);
+    }
+    checkCLError(error, "clGetProgramBuildInfo");
+
+    data->krn_enc = clCreateKernel(data->program, "des_encrypt_kern", &error);
+    data->krn_dec = clCreateKernel(data->program, "des_decrypt_kern", &error);
+    checkCLError(error, "");
+    free(buf);
     return error;
 }
 
 int DESBruteForceCL(      OpenCLData* cl_data,
                           cl_kernel krn,
-                          uint64_t* output, 
-                          uint32_t size,                                         
-                          uint64_t key_start,                                    
+                          uint64_t* output,
+                          uint32_t size,
+                          uint64_t key_start,
                           uint64_t data) {
 
     pthread_t stats_thread;
@@ -595,38 +597,38 @@ int DESBruteForceCL(      OpenCLData* cl_data,
     size_t final_block;
     blocks = (size / BLOCK_SIZE) + 1;
     final_block = size % BLOCK_SIZE;
-    cl_int error = 0;                                                           
-    cl_data->output = clCreateBuffer(cl_data->context, CL_MEM_WRITE_ONLY, 
+    cl_int error = 0;
+    cl_data->output = clCreateBuffer(cl_data->context, CL_MEM_WRITE_ONLY,
                                   min(BLOCK_SIZE, size) * sizeof(cl_ulong), NULL, &error);
-    checkCLError(error, "clCreateBuffer"); 
+    checkCLError(error, "clCreateBuffer");
     size = BLOCK_SIZE;
     for (int i = 0; i < blocks; i++) {
         if (i == blocks -1)
             size = final_block;
         size_t global_ws = size / 4;
         error  = clSetKernelArg(krn, 0, sizeof(cl_ulong), &key_start);
-        error |= clSetKernelArg(krn, 1, sizeof(cl_ulong), &data);              
-        error |= clSetKernelArg(krn, 2, sizeof(cl_mem), &(cl_data->output));                    
-        checkCLError(error, "clSetKernelArg");                                         
-                                                                                 
-        cl_event wait;                                                       
-        error = clEnqueueNDRangeKernel(cl_data->queue, krn, 1, NULL, &global_ws, NULL, 0, NULL, &wait); 
-	    checkCLError(error, "clEnqueueNDRangeKernel");                                         
-                                                                                 
-        error = clWaitForEvents(1, &wait);                                   
-        checkCLError(error, "clWaitForEvents");                                         
-                                                                                 
-        error = clEnqueueReadBuffer(cl_data->queue, cl_data->output, CL_TRUE, 0, 
-									size * sizeof(cl_ulong), 
-                                    output + BLOCK_SIZE * i, 
-									0, NULL, NULL); 
+        error |= clSetKernelArg(krn, 1, sizeof(cl_ulong), &data);
+        error |= clSetKernelArg(krn, 2, sizeof(cl_mem), &(cl_data->output));
+        checkCLError(error, "clSetKernelArg");
+
+        cl_event wait;
+        error = clEnqueueNDRangeKernel(cl_data->queue, krn, 1, NULL, &global_ws, NULL, 0, NULL, &wait);
+	    checkCLError(error, "clEnqueueNDRangeKernel");
+
+        error = clWaitForEvents(1, &wait);
+        checkCLError(error, "clWaitForEvents");
+
+        error = clEnqueueReadBuffer(cl_data->queue, cl_data->output, CL_TRUE, 0,
+									size * sizeof(cl_ulong),
+                                    output + BLOCK_SIZE * i,
+									0, NULL, NULL);
         checkCLError(error, "clEnqueueReadBuffer");
         key_start += BLOCK_SIZE;
-        total += size; 
+        total += size;
     }
     printFinalStats(&stats);
     pthread_cancel(stats_thread);
-    return 1; 
+    return 1;
 }
 
 inline int testSize(uint32_t size) {
@@ -639,50 +641,50 @@ inline int testSize(uint32_t size) {
     return (size);
 }
 
-                                                                          
-int DESBruteForceEncryptCL(uint64_t* output,                                    
-                          uint32_t size,                                         
-                          uint64_t key_start,                                    
+
+int DESBruteForceEncryptCL(uint64_t* output,
+                          uint32_t size,
+                          uint64_t key_start,
                           uint64_t tdata) {
     size = testSize(size);
     OpenCLData data;
     int error;
     if ( error = initOpenCL(&data, size) != CL_SUCCESS) {
         fprintf(stderr, "Unabled to open OpenCL Context. Error Code: %x\n", error);
-        return 0; 
+        return 0;
     }
     return DESBruteForceCL(&data, data.krn_enc, output, size, key_start, tdata);
 }
 
-int DESBruteForceDecryptCL(uint64_t* output,                                    
-                          uint32_t size,                                         
-                          uint64_t key_start,                                    
+int DESBruteForceDecryptCL(uint64_t* output,
+                          uint32_t size,
+                          uint64_t key_start,
                           uint64_t tdata) {
     size = testSize(size);
     OpenCLData data;
     int error;
     if (error = initOpenCL(&data, size) != CL_SUCCESS) {
         fprintf(stderr, "Unabled to open OpenCL Context. Error Code: %x\n", error);
-        return 0; 
+        return 0;
     }
     return DESBruteForceCL(&data, data.krn_dec, output, size, key_start, tdata);
 }
 
 #else
-int DESBruteForceEncryptCL(uint64_t* output,                                    
-                          uint32_t size,                                         
-                          uint64_t key_start,                                    
+int DESBruteForceEncryptCL(uint64_t* output,
+                          uint32_t size,
+                          uint64_t key_start,
                           uint64_t data) {
     fprintf(stderr, "Unabled to open OpenCL Context.\n OpenCL Support was not enabled at compile time\n");
-    return 0; 
+    return 0;
 }
 
-int DESBruteForceDecryptCL(uint64_t* output,                                    
-                          uint32_t size,                                         
-                          uint64_t key_start,                                    
+int DESBruteForceDecryptCL(uint64_t* output,
+                          uint32_t size,
+                          uint64_t key_start,
                           uint64_t data) {
     fprintf(stderr, "Unabled to open OpenCL Context.\n OpenCL Support was not enabled at compile time\n");
-    return 0; 
+    return 0;
 }
 
 
@@ -711,12 +713,12 @@ int DESTestCases() {
     //Test cases
     uint64_t mask = 0xFFFFFFFFFFFFFFFF;
     test("Testing single bit extraction:", extractBit(mask, 50, 64, 64, 64) == 0x1);
-    
+
     uint64_t data = 0xFEEDACABDEADBEEF;
     uint64_t permute = initialPermutation(data);
     test("Testing initial and final permutations:", data == finalPermutation(permute));
 
-        
+
     data = 0x675A69675E5A6B5A;
     uint64_t key = 0x5B5A57676A56676E;
     uint64_t cipherdata = DESEncrypt(data, key);
@@ -732,7 +734,7 @@ int DESTestCases() {
         key = getRand64();
         data = getRand64();
         newdata = DESDecrypt(DESEncrypt(data, key), key);
-        good = (newdata==data); 
+        good = (newdata==data);
     }
     test("Testing 100000 random encryption rounds:", good);
 
@@ -767,7 +769,7 @@ int DESTestCases() {
         }
     }
     test("Testing OpenCL Decryption", good);
-    return !good; 
+    return !good;
     #endif
 }
 #endif
