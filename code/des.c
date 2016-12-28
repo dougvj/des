@@ -146,7 +146,7 @@ static inline uint64_t extractBit(uint64_t input, int src, int dst, int s_size, 
     else
         output = (input & bit) << (dst - src);
     #ifdef DEBUG_EXTRACTOR
-        printf("extractBit:\tsrc:%u\tdst:%u\t\tI:%16llX\tO:%16llX\n", src, dst, input, output);
+        printf("extractBit:\tsrc:%u\tdst:%u\t\tI:%16" PRIx64 "\tO:%16" PRIx64 "\n", src, dst, input, output);
     #endif
     return output;
 }
@@ -183,7 +183,7 @@ static uint32_t doSBoxSub(int s_selector, uint32_t input) {
 static uint64_t initialPermutation(uint64_t input) {
     uint64_t output = doPermute(input, ip, ip_i, ip_o);
     #ifdef DEBUG_PERMUTER
-        printf("initialPermutation: B:%16llx A:%16llx\n", input, output);
+        printf("initialPermutation: B:%16" PRIx64 " A:%16" PRIx64 "\n", input, output);
     #endif
     return output;
 }
@@ -191,7 +191,7 @@ static uint64_t initialPermutation(uint64_t input) {
 static uint64_t finalPermutation(uint64_t input) {
     uint64_t output = doInversePermute(input, ip, ip_i, ip_o);
     #ifdef DEBUG_PERMUTER
-        printf("finalPermutation: B:%16llx A:%16llx\n", input, output);
+        printf("finalPermutation: B:%16" PRIx64 " A:%16" PRIx64 "\n", input, output);
     #endif
     return output;
 }
@@ -220,7 +220,7 @@ static uint64_t rotateCD(int round_num, uint64_t CD) {
     D = (D | ( tmpD << rotation)) & 0xFFFFFFF;
     CD = ((uint64_t)C << 28) | D;
     #ifdef DEBUG_ROTATE
-        printf("rotateRoundKey:\tnum:%u\tCB: %llX\tCA: %llX\tDB: %llX\tDA:%llX\n", round_num, tmpC, C, tmpD, D);
+        printf("rotateRoundKey:\tnum:%u\tCB: %" PRIx64 "\tCA: %" PRIx64 "\tDB: %" PRIx64 "\tDA:%" PRIx64 "\n", round_num, tmpC, C, tmpD, D);
     #endif
     return CD;
 }
@@ -260,7 +260,7 @@ static uint32_t manglerFunction(uint64_t key, uint32_t R) {
     }
     uint32_t perm = doPermute(output, rp, rp_i, rp_o);
     #ifdef DEBUG_MANGLER
-        printf("MANGLER: E: %14llx KS: %14llx E^KS: %14llx SBox: %8llx Perm: %8llx\n",E, key, EKS, output, perm);
+        printf("MANGLER: E: %14" PRIx64 " KS: %14" PRIx64 " E^KS: %14" PRIx64 " SBox: %8" PRIx64 " Perm: %8" PRIx64 "\n",E, key, EKS, output, perm);
     #endif
     return perm;
 }
@@ -271,7 +271,7 @@ static uint64_t expandParity(uint64_t key) {
     for (int i = 0; i < 8; i++) {
         output |= (key & (0x7F << i * 7)) <<((i * 8)-(i * 7));
     }
-    printf("KEXP: %16llx\n", output);
+    printf("KEXP: %16" PRIx64 "\n", output);
     return output;
 }
 
@@ -280,9 +280,9 @@ static uint64_t computeEncryptionRound(int round_num, uint64_t input, uint64_t k
     uint32_t L = (uint64_t)(input >> 32);
     uint64_t output = (uint64_t)(R) << 32;
     uint32_t mangle = manglerFunction(key, R);
-    output = output | mangle^L;
+    output = output | (mangle^L);
     #ifdef DEBUG_ROUNDS
-    printf("f(R%u\t= %8x, L\t= %8x  SK%u\t= %3x %3x %3x %3x %3x %3x %3x %3x) = %llx\n", round_num, R, L, round_num + 1, key>>42,
+    printf("f(R%u\t= %8x, L\t= %8x  SK%u\t= %3x %3x %3x %3x %3x %3x %3x %3x) = %" PRIx64 "\n", round_num, R, L, round_num + 1, key>>42,
                                                                                     key>>36 & 0x3F,
                                                                                     key>>30 & 0x3F,
                                                                                     key>>24 & 0x3F,
@@ -306,18 +306,18 @@ static uint64_t computeDecryptionRound(int round_num, uint64_t input, uint64_t k
 uint64_t DESEncrypt(uint64_t input, uint64_t key) {
     input = initialPermutation(input);
     #ifdef DEBUG_ROUNDS
-        printf("IP: %16llx\n", input);
+        printf("IP: %16" PRIx64 "\n", input);
     #endif
     uint64_t keys[16];
     uint64_t CD = generateCD(key);
     #ifdef DEBUG_KEYGEN
-        printf("CD:\t%16llx\n", CD);
+        printf("CD:\t%16" PRIx64 "\n", CD);
     #endif
     for (int i = 0; i < 16; i++) {
         CD = rotateCD(i, CD);
         keys[i] = generatePerRoundKey(CD);
         #ifdef DEBUG_KEYGEN
-        printf("K%u:\t%16llx\tCD:%16llx\n", i, keys[i], CD);
+        printf("K%u:\t%16" PRIx64 "\tCD:%16" PRIx64 "\n", i, keys[i], CD);
         #endif
     }
     for (int round_num = 0; round_num < 16; round_num++) {
@@ -327,7 +327,7 @@ uint64_t DESEncrypt(uint64_t input, uint64_t key) {
     input = (input >> 32) | (input  << 32);
     uint64_t output = finalPermutation(input);
     #ifdef DEBUG_ROUNDS
-        printf("F: %16llx FP: %16llx\n", input, output);
+        printf("F: %16" PRIx64 " FP: %16" PRIx64 "\n", input, output);
     #endif
     return output;
 }
@@ -336,18 +336,18 @@ uint64_t DESDecrypt(uint64_t input, uint64_t key) {
     input = initialPermutation(input);
     input = (input >> 32) | (input  << 32);
     #ifdef DEBUG_ROUNDS
-        printf("IP: %16llx\n", input);
+        printf("IP: %16" PRIx64 "\n", input);
     #endif
     uint64_t keys[16];
     uint64_t CD = generateCD(key);
     #ifdef DEBUG_KEYGEN
-        printf("CD:\t%16llx\n", CD);
+        printf("CD:\t%16" PRIx64 "\n", CD);
     #endif
     for (int i = 0; i < 16; i++) {
         CD = rotateCD(i, CD);
         keys[i] = generatePerRoundKey(CD);
         #ifdef DEBUG_KEYGEN
-        printf("K%u:\t%16llx\tCD:%16llx\n", i, keys[i], CD);
+        printf("K%u:\t%16" PRIx64 "\tCD:%16" PRIx64 "\n", i, keys[i], CD);
         #endif
     }
     for (int round_num = 15; round_num >= 0; round_num--) {
@@ -368,7 +368,7 @@ typedef struct {
 
 static void* startBruteForceEncryptThread(void* arg) {
     BruteForceData* bf_data = (BruteForceData*)arg;
-    fprintf(stderr, "Thread %3u started. Keys: %llX ->%llX\n", bf_data->thread_id,
+    fprintf(stderr, "Thread %3u started. Keys: %" PRIx64 " ->%" PRIx64 "\n", bf_data->thread_id,
                                                                 bf_data->key_start,
                                                                 bf_data->key_start + bf_data->size - 1);
     *(bf_data->num_checked) = 0;
@@ -381,7 +381,7 @@ static void* startBruteForceEncryptThread(void* arg) {
 
 static void* startBruteForceDecryptThread(void* arg) {
     BruteForceData* bf_data = (BruteForceData*)arg;
-    fprintf(stderr, "Thread %3u started. Keys: %llX ->%llX\n", bf_data->thread_id,
+    fprintf(stderr, "Thread %3u started. Keys: %" PRIx64 " ->%" PRIx64 "\n", bf_data->thread_id,
                                                                 bf_data->key_start,
                                                                 bf_data->key_start + bf_data->size - 1);
     *(bf_data->num_checked) = 0;
@@ -423,7 +423,7 @@ inline uint64_t getTotal(StatsStruct* stats) {
 void printFinalStats(StatsStruct* stats) {
     float total_time = get_time() - stats->start_time;
     uint64_t total = getTotal(stats);
-    printf("%llu keys checked in %f seconds at %f keys/s.\n", total, total_time, total/total_time);
+    printf("%" PRIu64 " keys checked in %f seconds at %f keys/s.\n", total, total_time, total/total_time);
 }
 
 void* printStatistics(void* arg) {
@@ -436,7 +436,7 @@ void* printStatistics(void* arg) {
         sleep(1);
 		c_time = get_time();
         total = getTotal(stats);
-        printf("%llu = keys checked at ~ %f keys/s. t = %f s\n", total,(total)/((c_time - start_time)), c_time - start_time );
+        printf("%" PRIu64 " = keys checked at ~ %f keys/s. t = %f s\n", total,(total)/((c_time - start_time)), c_time - start_time );
     }
 }
 
@@ -476,7 +476,7 @@ static int startBruteForce(void* (thread_ptr)(void*),
         pthread_join(threads[i], NULL);
     }
     printFinalStats(&stats);
-    pthread_cancel(stats_thread);
+    //pthread_cancel(stats_thread);
     return 1;
 }
 
@@ -693,7 +693,7 @@ int DESBruteForceDecryptCL(uint64_t* output,
 #endif
 
 static int test(char* msg, int assertion) {
-    printf(msg);
+    printf("%s", msg);
     for (int i = strlen(msg); i < 72; i++)
         putchar(' ');
     if (assertion)
@@ -723,7 +723,7 @@ int DESTestCases() {
     uint64_t key = 0x5B5A57676A56676E;
     uint64_t cipherdata = DESEncrypt(data, key);
     uint64_t newdata = DESDecrypt(cipherdata, key);
-//    printf("ACT: K: %16llX\t\tD: %16llX\t\t C: %16llX\t\t ND: %16llX\t\t\n", key, data, cipherdata, newdata);
+//    printf("ACT: K: %16" PRIx64 "\t\tD: %16" PRIx64 "\t\t C: %16" PRIx64 "\t\t ND: %16" PRIx64 "\t\t\n", key, data, cipherdata, newdata);
 //    printf("REF: K: 5B5A57676A56676E\t\tD: 675A69675E5A6B5A\t\t C: 974AFFBF86022D1F\t\t ND: 675A69675E5A6B5A\n");
     test("Testing encryptiong inverse round:", data == newdata);
     test("Testing correct output of encryption (PASS 1):", cipherdata == 0x974AFFBF86022D1F);
@@ -748,9 +748,9 @@ int DESTestCases() {
     DESBruteForceEncrypt(test_array, ARRAY_SIZE, key, data, 1);
     good = 1;
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        //printf("CL:%16llX C:%16llX\n", test_array_cl[i], test_array[i]);
+        //printf("CL:%16" PRIx64 " C:%16" PRIx64 "\n", test_array_cl[i], test_array[i]);
         if (test_array[i] != test_array_cl[i]) {
-            fprintf(stderr,"Descrepancy Offset: %u, WAS:%16llX EXPECTED:%16llX\n",i, test_array_cl[i], test_array[i]);
+            fprintf(stderr,"Descrepancy Offset: %u, WAS:%16" PRIx64 " EXPECTED:%16" PRIx64 "\n",i, test_array_cl[i], test_array[i]);
             good = 0;
             break;
         }
@@ -761,9 +761,9 @@ int DESTestCases() {
     DESBruteForceDecrypt(test_array, ARRAY_SIZE, key, data, 1);
     good = 1;
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        //printf("CL:%16llX C:%16llX\n", test_array_cl[i], test_array[i]);
+        //printf("CL:%16" PRIx64 " C:%16" PRIx64 "\n", test_array_cl[i], test_array[i]);
         if (test_array[i] != test_array_cl[i]) {
-            fprintf(stderr,"Descrepancy Offset: %u, WAS:%16llX EXPECTED:%16llX\n",i, test_array_cl[i], test_array[i]);
+            fprintf(stderr,"Descrepancy Offset: %u, WAS:%16" PRIx64 " EXPECTED:%16" PRIx64 "\n",i, test_array_cl[i], test_array[i]);
             good = 0;
             break;
         }
