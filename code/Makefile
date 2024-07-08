@@ -2,14 +2,14 @@ HEADERS=des.h
 SOURCES=main.c des.c
 OBJECTS=main.o des.o
 EXECUTABLE=BUILD/des
-CC=gcc -std=gnu99 
-LIBS=-lpthread -lrt
+CC=gcc -std=gnu99
+LIBS=-lrt -lpthread
 OPTS = -O2
 CFLAGS= -c $(OPTS)
 CFLAGS_CL = -DOPENCL
 LIBS_CL = -lOpenCL
 
-all:  
+all:
 	-test -e "main.o" && make clean_objects
 	make nocl
 	make clean_objects
@@ -27,16 +27,16 @@ build_dir:
 opencl: opencl_flags nocl build_dir
 
 nocl: $(OBJECTS) build_dir
-	$(CC) $(OBJECTS) -o $(EXECUTABLE) $(LIBS)
+	$(CC) $(OBJECTS) $(LIBS) -o $(EXECUTABLE)
 
-opencl_flags: 
-	$(eval CFLAGS := $(CFLAGS) $(CFLAGS_CL)) 
-	$(eval LIBS := $(LIBS) $(LIBS_CL)) 
-	$(eval EXECUTABLE := $(EXECUTABLE)_cl) 
+opencl_flags:
+	$(eval CFLAGS := $(CFLAGS) $(CFLAGS_CL))
+	$(eval LIBS := $(LIBS) $(LIBS_CL))
+	$(eval EXECUTABLE := $(EXECUTABLE)_cl)
 
-tests_flag: 
+tests_flag:
 	$(eval CFLAGS := $(CFLAGS) -D UNIT_TESTS)
-	$(eval EXECUTABLE := $(EXECUTABLE)_tests) 
+	$(eval EXECUTABLE := $(EXECUTABLE)_tests)
 
 debug:
 	$(eval CFLAGS:= -c -g)

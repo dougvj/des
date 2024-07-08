@@ -397,20 +397,12 @@ typedef struct {
     uint32_t num_threads;
     double start_time;
 } StatsStruct;
-/*
+
 double get_time()
 {
     struct timespec t;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-    return t.tv_sec + t.tv_nsec * 1e-6;//t.tv_sec + t.tv_nsec*1e-6;
-}
-*/
-double get_time()
-{
-    struct timeval t;
-    struct timezone tzp;
-    gettimeofday(&t, &tzp);
-    return t.tv_sec + t.tv_usec*1e-6;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec + t.tv_nsec * 1e-9;
 }
 
 inline uint64_t getTotal(StatsStruct* stats) {
@@ -426,17 +418,31 @@ void printFinalStats(StatsStruct* stats) {
     printf("%" PRIu64 " keys checked in %f seconds at %f keys/s.\n", total, total_time, total/total_time);
 }
 
+const double PRINT_INTERVAL = 0.5;
+
 void* printStatistics(void* arg) {
     StatsStruct* stats = (StatsStruct*)arg;
     double start_time = get_time();
     stats->start_time = start_time;
-	double c_time;
+    double c_time = start_time;
+    double last_time, next_time = start_time;
     uint64_t total;
+    uint64_t last_total = 0;
     for(;;) {
-        sleep(1);
-		c_time = get_time();
+        next_time = next_time + PRINT_INTERVAL;
+        usleep((next_time - c_time) * 1e6);
+        last_time = c_time;
+        c_time = get_time();
         total = getTotal(stats);
-        printf("%" PRIu64 " = keys checked at ~ %f keys/s. t = %f s\n", total,(total)/((c_time - start_time)), c_time - start_time );
+        double total_run_time = c_time - start_time;
+        uint64_t num_checked = total - last_total;
+        double interval = c_time - last_time;
+        double num_checked_avg = total / total_run_time;
+        double num_checked_cur = num_checked / interval;
+        printf(
+            "[%.2lf] %"PRIu64" = keys checked at ~ %10.2lf (avg) %10.2lf keys/s\n",
+            total, total_run_time, num_checked_avg, num_checked_cur);
+        last_total = total;
     }
 }
 
@@ -457,7 +463,11 @@ static int startBruteForce(void* (thread_ptr)(void*),
     StatsStruct stats;
     stats.num_checked = num_checked;
     stats.num_threads = num_threads;
-    pthread_create(&stats_thread, NULL, printStatistics, (void*) &stats);
+    err = pthread_create(&stats_thread, NULL, printStatistics, (void*) &stats);
+    if (err != 0) {
+      fprintf(stderr, "Unable to create stats thread.\n");
+      return 0;
+    }
     for (int i = 0; i < num_threads; i++) {
         bf_data[i].thread_id = i;
         bf_data[i].data = data;
@@ -475,8 +485,9 @@ static int startBruteForce(void* (thread_ptr)(void*),
     for (int i = 0; i < num_threads;i++) {
         pthread_join(threads[i], NULL);
     }
+    pthread_cancel(stats_thread);
+    pthread_join(stats_thread, NULL);
     printFinalStats(&stats);
-    //pthread_cancel(stats_thread);
     return 1;
 }
 
@@ -499,7 +510,7 @@ int DESBruteForceDecrypt(uint64_t* output,
 
 #ifdef OPENCL
 
-#define BLOCK_SIZE 1048576 
+#define BLOCK_SIZE 1048576
 
 typedef struct {
     cl_platform_id platform;
