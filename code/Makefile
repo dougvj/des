@@ -4,7 +4,7 @@ OBJECTS=main.o des.o
 EXECUTABLE=BUILD/des
 CC=gcc -std=gnu99
 LIBS=-lrt -lpthread
-OPTS = -O2
+OPTS = -O3 -march=native -mtune=native -ftree-vectorize -ftree-vectorizer-verbose=1 -fopt-info-vec-optimized
 CFLAGS= -c $(OPTS)
 CFLAGS_CL = -DOPENCL
 LIBS_CL = -lOpenCL
