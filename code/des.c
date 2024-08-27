@@ -413,9 +413,12 @@ inline uint64_t getTotal(StatsStruct* stats) {
 }
 
 void printFinalStats(StatsStruct* stats) {
-    float total_time = get_time() - stats->start_time;
+    double total_time = get_time() - stats->start_time;
     uint64_t total = getTotal(stats);
-    printf("%" PRIu64 " keys checked in %f seconds at %f keys/s.\n", total, total_time, total/total_time);
+    double keys_per_second = total / total_time;
+    printf("%" PRIu64 " keys checked in %f seconds at %lf keys/s.\n", total, total_time, keys_per_second);
+    uint64_t num_des_keys = ((uint64_t)1) << 56;
+    printf("Estimated time to check entire DES keyspace: %f years.\n", num_des_keys / keys_per_second / 60 / 60 / 24 / 365);
 }
 
 const double PRINT_INTERVAL = 0.5;
